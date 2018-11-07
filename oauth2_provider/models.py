@@ -66,7 +66,7 @@ class AbstractApplication(models.Model):
     )
 
     redirect_uris = models.TextField(
-        blank=True, help_text=_("Allowed URIs list, space separated"),
+        blank=True, help_text=_("Allowed URIs list, space separated. Wildcards (*) are allowed."),
     )
     client_type = models.CharField(max_length=32, choices=CLIENT_TYPES)
     authorization_grant_type = MultiSelectField(
