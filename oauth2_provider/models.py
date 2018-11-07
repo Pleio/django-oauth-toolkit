@@ -1,5 +1,6 @@
 from datetime import timedelta
 from urllib.parse import parse_qsl, urlparse
+from urlmatch import urlmatch
 
 from django.apps import apps
 from django.conf import settings
@@ -107,19 +108,9 @@ class AbstractApplication(models.Model):
 
         :param uri: Url to check
         """
-        parsed_uri = urlparse(uri)
-        uqs_set = set(parse_qsl(parsed_uri.query))
         for allowed_uri in self.redirect_uris.split():
-            parsed_allowed_uri = urlparse(allowed_uri)
-
-            if (parsed_allowed_uri.scheme == parsed_uri.scheme and
-                    parsed_allowed_uri.netloc == parsed_uri.netloc and
-                    parsed_allowed_uri.path == parsed_uri.path):
-
-                aqs_set = set(parse_qsl(parsed_allowed_uri.query))
-
-                if aqs_set.issubset(uqs_set):
-                    return True
+            if urlmatch(allowed_uri, uri):
+                return True
 
         return False
 
@@ -135,15 +126,7 @@ class AbstractApplication(models.Model):
         allowed_schemes = set(s.lower() for s in self.get_allowed_schemes())
 
         if redirect_uris:
-            validator = RedirectURIValidator(WildcardSet())
-            for uri in redirect_uris:
-                validator(uri)
-                scheme = urlparse(uri).scheme
-                if scheme not in allowed_schemes:
-                    raise ValidationError(_(
-                        "Unauthorized redirect scheme: {scheme}"
-                    ).format(scheme=scheme))
-
+            pass
         elif self.authorization_grant_type in grant_types:
             raise ValidationError(_(
                 "redirect_uris cannot be empty with grant_type {grant_type}"
