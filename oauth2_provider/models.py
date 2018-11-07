@@ -8,6 +8,7 @@ from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from multiselectfield import MultiSelectField
 
 from .generators import generate_client_id, generate_client_secret
 from .scopes import get_scopes_backend
@@ -67,8 +68,8 @@ class AbstractApplication(models.Model):
         blank=True, help_text=_("Allowed URIs list, space separated"),
     )
     client_type = models.CharField(max_length=32, choices=CLIENT_TYPES)
-    authorization_grant_type = models.CharField(
-        max_length=32, choices=GRANT_TYPES
+    authorization_grant_type = MultiSelectField(
+        max_length=255, choices=GRANT_TYPES
     )
     client_secret = models.CharField(
         max_length=255, blank=True, default=generate_client_secret, db_index=True
@@ -159,7 +160,11 @@ class AbstractApplication(models.Model):
         return oauth2_settings.ALLOWED_REDIRECT_URI_SCHEMES
 
     def allows_grant_type(self, *grant_types):
-        return self.authorization_grant_type in grant_types
+        for grant_type in self.authorization_grant_type:
+            if grant_type in grant_types:
+                return True
+
+        return False
 
     def is_usable(self, request):
         """

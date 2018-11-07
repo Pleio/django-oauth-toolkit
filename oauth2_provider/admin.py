@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 
 from .models import (
@@ -11,7 +12,6 @@ class ApplicationAdmin(admin.ModelAdmin):
     list_filter = ("client_type", "authorization_grant_type", "skip_authorization")
     radio_fields = {
         "client_type": admin.HORIZONTAL,
-        "authorization_grant_type": admin.VERTICAL,
     }
     raw_id_fields = ("user", )
 
