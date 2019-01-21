@@ -198,7 +198,7 @@ class AbstractGrant(models.Model):
         oauth2_settings.APPLICATION_MODEL, on_delete=models.CASCADE
     )
     expires = models.DateTimeField()
-    redirect_uri = models.CharField(max_length=255)
+    redirect_uri = models.CharField()
     scope = models.TextField(blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
